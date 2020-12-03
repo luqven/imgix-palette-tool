@@ -1,18 +1,24 @@
 # Imgix-Palette-Tool
 
-The imgix URL API includes a parameter that can extract the color palette for an image served through its service: https://docs.imgix.com/apis/url/color-palette/palette.
+ Get a color palette from an imgix-image in CSS and JSON formats and recommend an overlaid-text color to match.
+ 
+ Makes use of the [imgix URL API parameter](https://docs.imgix.com/apis/url/color-palette/palette) that extracts the color palette for an image served through its service.
 
-This small library has two functions: one that returns the color palette of a given imgix-served image, and another that determines a suitable color for overlaid text on a given imgix-served image.
+## Concepts and usage
 
-# Motivation
+This small library has two functions: 
+- `getPalette`: returns the color palette of a given imgix-served image
+- `getOverlayColor`: determines a suitable color for overlaid text on a given imgix-served image.
 
-This library can be used to automatically adjust styling depending on an imgix asset's attributes. I.e., have an image's overlaid text automatically update its color styles if the image changes in any way.
+<!-- This library can be used to automatically adjust styling depending on an imgix asset's attributes. I.e., have an image's overlaid text automatically update its color styles if the image changes in any way. -->
 
-# Use
+### Getting the color palette of a given imgix-served image
 
-## Request an imgix image's color palette
+```javascript
+const { cssPalette, jsonPalette } = getPalette(imgixUrl)
+```
 
- Pass a valid imgix url string argument to `getPalette` to have it return an Object with two keys, `cssPalette` and `jsonPalette`.
+ Get a CSS and JSON representation of an image's color palette by passing `getPalette` a valid imgix url string.
 
  ```javascript
 import { getPalette } from 'imgix-palette-tool'
@@ -61,21 +67,22 @@ const { cssPalette, jsonPalette } = getPalette(imgixUrl)
    {"colors":[{"red":0.980392,"hex":"#fa9e5a","blue":0.352941,"green":0.619608},{"red":0.282353,"hex":"#48abe6","blue":0.901961,"green":0.670588},{"red":0.219608,"hex":"#389cd3","blue":0.827451,"green":0.611765},{"red":0.0156863,"hex":"#0483bc","blue":0.737255,"green":0.513725},{"red":0.643137,"hex":"#a45f59","blue":0.34902,"green":0.372549},{"red":0.560784,"hex":"#8f1613","blue":0.0745098,"green":0.0862745}],"average_luminance":0.375264,"dominant_colors":{"vibrant":{"red":0.027451,"hex":"#0789c5","blue":0.772549,"green":0.537255},"muted_light":{"red":0.698039,"hex":"#b2a4b1","blue":0.694118,"green":0.643137},"muted":{"red":0.643137,"hex":"#a45f59","blue":0.34902,"green":0.372549},"vibrant_dark":{"red":0.00784314,"hex":"#027ab5","blue":0.709804,"green":0.478431},"vibrant_light":{"red":0.980392,"hex":"#fa9e5a","blue":0.352941,"green":0.619608},"muted_dark":{"red":0.207843,"hex":"#354e60","blue":0.376471,"green":0.305882}}}
    ```
 
-## Given a color palette, recommend the overlaid-text-color
+### Determining a suitable color for overlaid text on a given imgix-served image
 
-Pass a imgix-color-palette formatted css string or JSON object to the `getOverlayColor` function and have it return a hex color that best suits text overlaid on that image palette.
+```javascript
+ const overlayColor = {className, hex} = getOverlayColor(palette)
+```
+
+Get an Object with the `className` and `hex` of the color that best suits text overlaid on an image by passing an [imgix-color-palette](#getting-the-color-palette-of-a-given-imgix-served-image) to the `getOverlayColor`.
 
  ``` javascript
  import { getPalette, getOverlayColor } from 'imgix-palette-tool'
 
  const imgixUrl = 'https://www.imgix.some-img.net'
- const { jsonPalette } = getPalette(imgixUrl)
- const overlayColor = getOverlayColor({json: jsonPalette})
+ const palette = getPalette(imgixUrl)
+ const overlayColor = {className, hex} = getOverlayColor(palette)
 
  ```
 
-   - `overlayColor`: hex-string representing the best color for overlaid text with the given palette
-
-   ```string
-   `#0483bc`
-   ```
+   - `className`: string representing the imgix specific class for the color, i.e `image-fg-1`
+  - `hex`: string representing the hex-color-code of the color, i.e. `#6dca9a`
