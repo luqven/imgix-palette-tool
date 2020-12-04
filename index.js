@@ -1,13 +1,6 @@
 // index.js
 const https = require('https');
 
-// TODO: remove this
-const images = [
-  'https://assets.imgix.net/unsplash/bridge.jpg',
-  'https://assets.imgix.net/unsplash/pineneedles.jpg',
-  'https://assets.imgix.net/unsplash/motorbike.jpg',
-];
-
 // https GET request helper
 const getContent = function (url) {
   return new Promise((resolve, reject) => {
@@ -155,13 +148,6 @@ const getOverlayColor = palette => {
 
   return {color: overlayColor.hex, needsBackdrop, className};
 };
-
-// TODO: remove this
-getPalette(images[2]).then(res => {
-  const palette = res;
-  const recommendedOverlayColor = getOverlayColor(palette);
-  console.log(recommendedOverlayColor);
-});
 
 module.exports = {
   getPalette,
