@@ -91,4 +91,4 @@ Get an Object with `className`, `needsBackdrop`, and hex `color` of the color th
 
    - `className`: string representing the imgix specific class for the color, i.e `image-fg-1`
   - `color`: hex color code of the backdrop color
-  - `needsBackdrop`: boolean that indicates if contrast too low to just use white for text color
+  - `needsBackdrop`: boolean that indicates if contrast too low and a black semi-transparent backdrop is [recommended](https://www.w3.org/TR/2016/NOTE-WCAG20-TECHS-20161007/G18)
