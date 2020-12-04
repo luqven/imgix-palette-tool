@@ -52,13 +52,17 @@ const hex2RGB = str => {
 
   if (long) {
     const value = Number.parseInt(long, 16);
-    return {red: value >> 16, green: (value >> 8) & 0xff, blue: value & 0xff};
+    color = {red: value >> 16, green: (value >> 8) & 0xff, blue: value & 0xff};
+    color.red = color.red / 255;
+    color.green = color.green / 255;
+    color.blue = color.blue / 255;
+    return color;
   } else if (short) {
     const rgbArr = Array.from(short, s => Number.parseInt(s, 16)).map(n => (n << 4) | n);
     const color = {};
-    color.red = rgbArr[0];
-    color.green = rgbArr[1];
-    color.blue = rgbArr[2];
+    color.red = rgbArr[0] / 255;
+    color.green = rgbArr[1] / 255;
+    color.blue = rgbArr[2] / 255;
     return color;
   }
 };
@@ -95,33 +99,61 @@ function convertToLinearRBG(primaryColor_sRGB) {
  *
  * assume the overlay text color will be white
  * check that none of the palette colors contrast too low for white (>= 4.5 times lighter)
- * if it is, backdrop needed. Suggest vibrant_light as alternate
- * return hex color, backdrop bool, and suggested alternative
+ * if it is, backdrop needed. Suggest dominant_color as alternate
+ * return hex color, backdrop bool, and className if available
  */
 
-const getOverlayColor = palette => {
-  let overlayHex = '#ffffff';
-  let overlayColor = hex2RGB(overlayHex); // defaults to white
-  overlayColor.hex = overlayHex;
-  let overlayLuminance = getLuminance(overlayColor);
-  const json = JSON.parse(palette.json);
-  const colors = json.colors; // [{"red":0.980392,"hex":"#fa9e5a","blue":0.352941,"green":0.619608},...]
-  const alternateOverlayColor = json.dominant_colors.vibrant_light;
-  const contrasts = [];
-
+const findSmallestContrast = (colors, overlayColor) => {
+  let smallestContrast = Infinity;
   colors.forEach(color => {
-    contrasts.push(getContrast(overlayColor, color));
+    const currentContrast = getContrast(overlayColor, color);
+    if (currentContrast < smallestContrast) smallestContrast = currentContrast;
+  });
+  return smallestContrast;
+};
+
+const isLowContrast = contrast => {
+  return contrast < 4.5;
+};
+
+const getOverlayColor = palette => {
+  const json = JSON.parse(palette.json);
+  const colors = Object.values(json.dominant_colors).map(color => {
+    // {"vibrant":{"red":0.027451,"hex":"#0789c5","blue":0.772549, ...}, ...}
+    return color;
   });
 
+  // determine contrast of overlay text if assumed to be white
+  const overlayColorHex = '#ffffff'; // white
+  let overlayColor = hex2RGB(overlayColorHex);
+  overlayColor.hex = overlayColorHex;
+  let className = '';
+  const smallestContrast = findSmallestContrast(colors, overlayColor);
   // if contrast is too low, the overlay will need a semi-transparent backdrop
-  let needsBackdrop = false;
-  contrasts.forEach(val => {
-    if (val >= 4.5 * overlayLuminance) {
-      needsBackdrop = true;
-    }
-  });
+  let needsBackdrop = isLowContrast(smallestContrast);
 
-  return {color: overlayColor.hex, needsBackdrop, alternate: alternateOverlayColor.hex};
+  // determine if any other color candidates would be better
+  if (needsBackdrop) {
+    let i = 0;
+
+    while (i < colors.length - 1) {
+      let curColor = colors[i];
+      let curLuminance = getLuminance(curColor);
+      let className = Object.keys(json.dominant_colors)[i];
+      let remainingColors = colors.slice(0, i).concat(colors.slice(i + 1));
+      let curContrast = findSmallestContrast(remainingColors, curColor);
+
+      if (isLowContrast(curContrast)) {
+        i++;
+      } else {
+        overlayColor = curColor;
+        needsBackdrop = false;
+        break;
+      }
+    }
+  }
+
+  return {color: overlayColor.hex, needsBackdrop, className};
 };
 
 // TODO: remove this
