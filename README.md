@@ -6,6 +6,8 @@
 
 ## Concepts and usage
 
+`npm i imgix-palette-tool`
+
 This small library has two functions: 
 - `getPalette`: asynchronous function that returns the color palette of a given imgix-served image
 - `getOverlayColor`: function that determines a suitable color for overlaid text on a given imgix-served image.
