@@ -1,5 +1,5 @@
 {
-  "name": "imgix-palette",
+  "name": "imgix-palette-tool",
   "version": "0.0.1",
   "description": "Imgix palette lookup and recommendation tool",
   "main": "index.js",
