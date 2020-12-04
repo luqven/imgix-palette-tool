@@ -13,5 +13,10 @@
   },
   "keywords": [],
   "author": "luis ball",
-  "license": "ISC"
+  "license": "ISC",
+  "homepage": "https://github.com/luqven/imgix-palette-tool",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/luqven/imgix-palette-tool.git"
+  }
 }
